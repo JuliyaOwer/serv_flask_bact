@@ -37,21 +37,9 @@ def uploaded_file(filename):
 
 @app.route('/processed')
 def preprocessed_file():
-    return '''
-    <!DOCTYPE html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Анализ изображений</title>
-    </head>
-    <body>
-        <p style="text-align: center">
-        <button> <a href=click>Данные о бактериях</a></button>
-    </p>
-    </body>
-    </html>
-    '''
+    return render_template("functions.html")
 
-@app.route('/click')
+@app.route('/full_process')
 def on_click():
     return redirect(url_for('analisys'))
 

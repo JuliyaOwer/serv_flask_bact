@@ -31,8 +31,12 @@ def segment_index(index: int, dir):
 
 def segment_file(img_file: str):
     img_path = path + "\\" + img_file
-    img = czifile.imread(img_path)
-    img = img[0,:,:,:]
+    img = ""
+    if img_file.rsplit('.', 1)[1] == "czi":
+        img = czifile.imread(img_path)
+        img = img[0,:,:,:]
+    else:
+        img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     th = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 2)
