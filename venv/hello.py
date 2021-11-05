@@ -3,6 +3,7 @@ from flask import Flask, request, redirect, url_for, send_from_directory, render
 from werkzeug.utils import secure_filename
 from analis import *
 
+
 UPLOAD_FOLDER = 'D:\\Example\\name\\'
 ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
 
@@ -23,15 +24,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('preprocessed_file')) #redirect(url_for('uploaded_file', filename=filename))
-    return '''
-    <!doctype html>
-    <title>Начальная страница загрузки</title>
-    <h1>Загрузите новое изображение</h1>
-    <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Загрузить>
-    </form>
-    '''
+    return render_template("func_page.html")
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
