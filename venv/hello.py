@@ -17,6 +17,10 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
+def main_page():
+    return render_template("func_page.html")
+
+@app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
@@ -24,7 +28,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('preprocessed_file')) #redirect(url_for('uploaded_file', filename=filename))
-    return render_template("func_page.html")
+    return render_template("upload.html")
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
