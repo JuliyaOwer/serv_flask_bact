@@ -4,59 +4,89 @@ from werkzeug.utils import secure_filename
 from analis import *
 
 
-UPLOAD_FOLDER = 'D:\\Example\\name\\'
-ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
+SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage\\'
+RIMAGE_FOLDER = ''
+SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata\\'
+RDATA_FOLDER = ''
+
+
+IMAGE_ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
+DATA_ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SIMAGE_UPLOAD_FOLDER'] = SIMAGE_UPLOAD_FOLDER
+app.config['SDATA_UPLOAD_FOLDER'] = SDATA_UPLOAD_FOLDER
 
-
-def allowed_file(filename):
+def allowed_image(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1] in IMAGE_ALLOWED_EXTENSIONS
+
+def allowed_data(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in DATA_ALLOWED_EXTENSIONS
+
 
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
     return render_template("func_page.html")
 
-@app.route('/upload_file', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('preprocessed_file')) #redirect(url_for('uploaded_file', filename=filename))
-    return render_template("upload.html")
-
+"""
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+"""
 
-@app.route('/processed')
-def preprocessed_file():
+
+################################
+#Переход по страничкам с главной
+################################
+
+@app.route('/upload_file', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_image(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['SIMAGE_UPLOAD_FOLDER'], filename))
+            return redirect(url_for('image_functions'))
+    return render_template("upload_image.html")
+
+@app.route('/upload_dataframe', methods=['GET', 'POST'])
+def upload_dataframe():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_data(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['SDATA_UPLOAD_FOLDER'], filename))
+            return redirect(url_for('data_functions'))
+    return render_template("upload_dataframe.html")
+
+@app.route('/image_functions')
+def image_functions():
     return render_template("functions.html")
 
-@app.route('/full_process')
-def on_click():
+@app.route('/data_functions')
+def data_functions():######### ПОМЕНЯТЬ ОТОБРАЖАЕМЫЙ ШАБЛОН ################
+    return render_template("functions.html")
+
+
+@app.route('/full_analis')
+def full_analis():
     return redirect(url_for('analisys'))
 
-@app.route('/analisys')
+@app.route('/preprocess_image')
+def preprocess_image():
+    return "preprocess_iamge"
+
+@app.route('/final_results')
+def final_results():
+    return "final_results"
+
+#########################
+
+
+@app.route('/analis')
 def analisys():
-    img_files = [file for file in os.listdir('D://Example/name')]
-    for i in range(len(img_files)): segment_index(i, img_files)
-    return '''
-    <!DOCTYPE html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Анализ изображений</title>
-    </head>
-    <body>
-        <p style="text-align: center">
-            <div> Данные анализа успешно сохранены.</div>
-        </p>
-    </body>
-    </html>
-    '''
+    return "full_analis"
