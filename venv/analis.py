@@ -21,10 +21,6 @@ def e_d(image, it):
     return image
 
 
-path = r"D://Example/name"
-#img_files = [file for file in os.listdir(path)]
-
-
 def segment_index(index: int, dir):
     segment_file(dir[index])
 
@@ -34,11 +30,11 @@ def segment_file(img_file: str):
     img = ""
     if img_file.rsplit('.', 1)[1] == "czi":
         img = czifile.imread(img_path)
-        img = img[0,:,:,:]
+        img = img[0, :, :, :]
     else:
         img = cv2.imread(img_path)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     th = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 2)
     th = e_d(th.copy(), 1)
 
@@ -82,7 +78,6 @@ def segment_file(img_file: str):
     bacteriaImg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
     data = []
-    #cent = []
 
     for bacteria in finalContours:
         M = cv2.moments(bacteria)
@@ -91,13 +86,11 @@ def segment_file(img_file: str):
 
         # bacteriaImg = cv2.circle(bacteriaImg, (cx, cy), 5, (0, 0, 255), -1)
         cv2.circle(bacteriaImg, (cx, cy), 5, (0, 0, 255), -1)
-        #ellipse = cv2.fitEllipse(bacteria)
+        # ellipse = cv2.fitEllipse(bacteria)
         (x, y), (MA, ma), ellipse = cv2.fitEllipse(bacteria)
-        #cv2.ellipse(bacteriaImg, ellipse, (0, 255, 0), 2)[2]
-        #cent.append([x, y])
+        # cv2.ellipse(bacteriaImg, ellipse, (0, 255, 0), 2)[2]
         data.append([MA, ma])
 
-    # cent_df = pd.DataFrame(cent, columns=('x', 'y'))
     data_df = pd.DataFrame(data, columns=('MA', 'ma'))
     data_df.to_csv("D://Example/res/allDetectedObjects.csv", sep=";", index=False)
 
@@ -105,7 +98,6 @@ def segment_file(img_file: str):
     data_df = data_df.drop(data_df[data_df['MA'] < 10].index)
     data_df.to_csv("D://Example/res/clear.csv", sep=";", index=False)
 
-    # print(data_df)
     data_df = data_df / 100
 
     clasterNum = 3
@@ -115,13 +107,3 @@ def segment_file(img_file: str):
 
     data_df['clust'] = labels
     data_df.to_csv("D://Example/res/clear_norm_clust.csv", sep=";", index=False)
-
-    # print(data_df)
-    # print(data_df.groupby('clust')['clust'].count())
-
-
-    #plt.scatter(data_df['ma'], data_df['MA'], c=k_means.labels_.astype(float))
-    #plt.show()
-
-#for i in range(len(img_files)):
-#    segment_index(i)
