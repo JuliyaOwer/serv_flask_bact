@@ -22,7 +22,6 @@ app.config['SIMAGE_UPLOAD_FOLDER'] = SIMAGE_UPLOAD_FOLDER
 app.config['SDATA_UPLOAD_FOLDER'] = SDATA_UPLOAD_FOLDER
 
 
-
 def allowed_image(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in IMAGE_ALLOWED_EXTENSIONS
@@ -55,6 +54,14 @@ def e_d(image, it):
 
 def segment_file(img_file: str):
     img_path = SIMAGE_UPLOAD_FOLDER + "\\" + img_file
+
+    img = []
+
+    if img_file.rsplit('.',1)[1] == "czi":
+        img = czifile.imread(img_path)
+        img = img[0,:,:,:]
+    else:
+        img = cv2.imread(img_path)
 
     img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -115,7 +122,7 @@ def segment_file(img_file: str):
         (x, y), (MA, ma), ellipse = cv2.fitEllipse(bacteria)
         data.append([MA, ma])
 
-    cv2.imwrite(RIMAGE_FOLDER + "\\" + img_file, bacteriaImg)
+    cv2.imwrite(RIMAGE_FOLDER + "\\" + img_file.rsplit('.', 1) [0] + ".jpeg", bacteriaImg)
 
     data_df = pd.DataFrame(data, columns=('MA', 'ma'))
     data_df.to_csv(RDATA_FOLDER + "/allDetectedObjects.csv", sep=";", index=False)
@@ -157,13 +164,22 @@ def uploaded_file(filename):
 
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_image(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['SIMAGE_UPLOAD_FOLDER'], filename))
-            return redirect(url_for('image_functions'))
+    if request.method == 'POST' and 'files' in request.files:
+        for file in request.files.getlist('files'):
+            if file and allowed_image(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['SIMAGE_UPLOAD_FOLDER'], filename))
+        return redirect(url_for('image_functions'))
     return render_template("upload_image.html")
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST' and 'photo' in request.files:
+        for f in request.files.getlist('photo'):
+            f.save(os.path.join(app.config['UPLOAD_PATH'], f.filename))
+        return 'Upload completed.'
+    return render_template('upload.html')
+
 
 
 @app.route('/upload_dataframe', methods=['GET', 'POST'])
@@ -206,6 +222,7 @@ def final_results():
 
 @app.route('/analis')
 def analisys():
+    print(img_files)
     for i in range(len(img_files)):
         segment_index(i)
     return render_template("main_page.html")
