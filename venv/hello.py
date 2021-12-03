@@ -4,15 +4,15 @@ from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
 import pandas as pd
-import cv2
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 import czifile
+from sklearn.cluster import KMeans
 
 SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage\\'
 RIMAGE_FOLDER = 'D:\\Example\\rimage\\'
 SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata\\'
 RDATA_FOLDER = 'D:\\Example\\rdata\\'
+
+img_files = [file for file in os.listdir(SIMAGE_UPLOAD_FOLDER)]
 
 IMAGE_ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
 DATA_ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
@@ -41,28 +41,8 @@ core = np.array([[0, 0, 1, 0, 0],
 
 
 ###### CalcFunctions ######
-def stat(data):
-    data_df = pd.DataFrame(data, columns=('MA', 'ma'))
-    data_df.to_csv(RDATA_FOLDER + "/allDetectedObjects.csv", sep=";", index=False)
-
-    data_df = data_df.drop(data_df[data_df['ma'] > 100].index)
-    data_df = data_df.drop(data_df[data_df['MA'] < 10].index)
-    data_df.to_csv(RDATA_FOLDER + "/clear.csv", sep=";", index=False)
-
-    print(data_df)
-    data_df = data_df / 100
-
-    clasterNum = 3
-    k_means = KMeans(init="k-means++", n_clusters=clasterNum, n_init=12)
-    k_means.fit(data_df)
-    labels = k_means.labels_
-
-    data_df['clust'] = labels
-    data_df.to_csv(RDATA_FOLDER + "/clear_norm_clust.csv", sep=";", index=False)
-
 
 def segment_index(index: int):
-    img_files = [file for file in os.listdir(SIMAGE_UPLOAD_FOLDER)]
     segment_file(img_files[index])
 
 def e_d(image, it):
@@ -76,12 +56,7 @@ def e_d(image, it):
 def segment_file(img_file: str):
     img_path = SIMAGE_UPLOAD_FOLDER + "\\" + img_file
 
-    if img_file.rsplit('.', 1)[1] == "czi":
-        img = czifile.imread(img_path)
-        img = img[0, :, :, :]
-    else:
-        img = cv2.imread(img_path)
-
+    img = cv2.imread(img_path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     th = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 2)
@@ -127,7 +102,6 @@ def segment_file(img_file: str):
     bacteriaImg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
     data = []
-    cent = []
 
     for bacteria in finalContours:
         M = cv2.moments(bacteria)
@@ -139,13 +113,26 @@ def segment_file(img_file: str):
         ellipse = cv2.fitEllipse(bacteria)
         cv2.ellipse(bacteriaImg, ellipse, (0, 255, 0), 2)[2]
         (x, y), (MA, ma), ellipse = cv2.fitEllipse(bacteria)
-        cent.append([x, y])
         data.append([MA, ma])
 
     cv2.imwrite(RIMAGE_FOLDER + "\\" + img_file, bacteriaImg)
-    return data
 
+    data_df = pd.DataFrame(data, columns=('MA', 'ma'))
+    data_df.to_csv(RDATA_FOLDER + "/allDetectedObjects.csv", sep=";", index=False)
 
+    data_df = data_df.drop(data_df[data_df['ma'] > 100].index)
+    data_df = data_df.drop(data_df[data_df['MA'] < 10].index)
+    data_df.to_csv(RDATA_FOLDER + "/clear.csv", sep=";", index=False)
+
+    data_df = data_df / 100
+
+    clasterNum = 3
+    k_means = KMeans(init="k-means++", n_clusters=clasterNum, n_init=12)
+    k_means.fit(data_df)
+    labels = k_means.labels_
+
+    data_df['clust'] = labels
+    data_df.to_csv(RDATA_FOLDER + "/clear_norm_clust.csv", sep=";", index=False)
 
 
 ###########################
@@ -217,13 +204,9 @@ def final_results():
 
 #########################
 
-
 @app.route('/analis')
 def analisys():
-    img_files = [file for file in os.listdir(SIMAGE_UPLOAD_FOLDER)]
-    data = pd.DataFrame()
     for i in range(len(img_files)):
-        data.append(segment_index(i))
-    stat(data)
-    return print(data) #render_template("main_page.html")
+        segment_index(i)
+    return render_template("main_page.html")
 
