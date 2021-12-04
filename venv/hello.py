@@ -8,12 +8,15 @@ import pandas as pd
 import czifile
 from sklearn.cluster import KMeans
 
-SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage'
-RIMAGE_FOLDER = 'D:\\Example\\rimage'
-SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata'
-RDATA_FOLDER = 'D:\\Example\\rdata'
+# SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage'
+# RIMAGE_FOLDER = 'D:\\Example\\rimage'
+# SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata'
+# RDATA_FOLDER = 'D:\\Example\\rdata'
 
-data_files = [file for file in os.listdir(SDATA_UPLOAD_FOLDER)]
+SIMAGE_UPLOAD_FOLDER = '/home/julia/data/simage'
+RIMAGE_FOLDER = '/home/julia/data/rimage'
+SDATA_UPLOAD_FOLDER = '/home/julia/data/sdf'
+RDATA_FOLDER = '/home/julia/data/rdf'
 
 IMAGE_ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
 DATA_ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
@@ -41,6 +44,7 @@ core = np.array([[0, 0, 1, 0, 0],
                  [0, 1, 1, 1, 0],
                  [0, 0, 1, 0, 0]], dtype=np.uint8)
 
+
 def stat_culc():
     data = pd.DataFrame()
     data = pd.read_csv(RDATA_FOLDER + "\\clear.csv", sep=";")
@@ -52,20 +56,22 @@ def stat_culc():
     result = result.reset_index(drop=True)
 
     result["result"] = data['MA'].min(), \
-                    data['ma'].min(), \
-                    data['MA'].max(), \
-                    data['ma'].max(), \
-                    data['MA'].mean(), \
-                    data['ma'].mean(), \
-                    data['MA'].std(), \
-                    data['ma'].std(), \
-                    data['MA'].skew(), \
-                    data['ma'].skew(), \
-                    len(data.index)
+                       data['ma'].min(), \
+                       data['MA'].max(), \
+                       data['ma'].max(), \
+                       data['MA'].mean(), \
+                       data['ma'].mean(), \
+                       data['MA'].std(), \
+                       data['ma'].std(), \
+                       data['MA'].skew(), \
+                       data['ma'].skew(), \
+                       len(data.index)
     result.to_csv(RDATA_FOLDER + '\\stat_culc.csv', sep=';', index=False)
+
 
 def segment_index(dir, index: int):
     segment_file(dir[index])
+
 
 def e_d(image, it):
     image = cv2.erode(image, core, iterations=it)
@@ -74,12 +80,14 @@ def e_d(image, it):
     image = cv2.morphologyEx(image, cv2.MORPH_ERODE, core, iterations=1)
     return image
 
+
 def read_image(path, file):
     if file.rsplit('.', 1)[1] == "czi":
         img = czifile.imread(path)
         return img[0, :, :, :]
     else:
         return cv2.imread(path)
+
 
 def segment_file(img_file: str):
     img_path = SIMAGE_UPLOAD_FOLDER + "\\" + img_file
@@ -169,10 +177,12 @@ def segment_file(img_file: str):
 def main_page():
     return render_template("main_page.html")
 
+
 def clear_folder(folder):
     files = [file for file in os.listdir(folder)]
     for file in files:
         os.remove(folder + '\\' + file)
+
 
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
@@ -203,9 +213,11 @@ def upload_dataframe():
 def image_functions():
     return render_template("image_functions.html")
 
+
 @app.route('/download_files')
 def download_files():
     return render_template("download_files.html")
+
 
 @app.route('/data_functions')
 def data_functions():
@@ -242,12 +254,13 @@ def csv_only():
     res_files = [file for file in os.listdir(RDATA_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('data.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RDATA_FOLDER+'\\'+file)
+        zipFile.write(RDATA_FOLDER + '\\' + file)
         zipFile.close()
-        if os.path.exists(RDATA_FOLDER+'\\'+file):
-            os.remove(RDATA_FOLDER+'\\'+file)
+        if os.path.exists(RDATA_FOLDER + '\\' + file):
+            os.remove(RDATA_FOLDER + '\\' + file)
     os.chdir(old_wd)
     return download(RDATA_FOLDER, 'data.zip')
+
 
 @app.route('/image_only')
 def image_only():
@@ -256,14 +269,14 @@ def image_only():
     res_files = [file for file in os.listdir(RIMAGE_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('images.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RIMAGE_FOLDER+'\\'+file)
+        zipFile.write(RIMAGE_FOLDER + '\\' + file)
         zipFile.close()
-        if os.path.exists(RIMAGE_FOLDER+'\\'+file):
-            os.remove(RIMAGE_FOLDER+'\\'+file)
+        if os.path.exists(RIMAGE_FOLDER + '\\' + file):
+            os.remove(RIMAGE_FOLDER + '\\' + file)
     os.chdir(old_wd)
     return download(RIMAGE_FOLDER, 'images.zip')
+
 
 @app.route('/download/<filename>')
 def download(dir, filename):
     return send_from_directory(dir, filename)
-
