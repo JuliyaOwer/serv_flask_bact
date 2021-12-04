@@ -47,7 +47,7 @@ core = np.array([[0, 0, 1, 0, 0],
 
 def stat_culc():
     data = pd.DataFrame()
-    data = pd.read_csv(RDATA_FOLDER + "\\clear.csv", sep=";")
+    data = pd.read_csv(RDATA_FOLDER + "/clear.csv", sep=";")
 
     result = pd.DataFrame(index=['min_MA', 'min_ma', 'max_MA', 'max_ma', 'mean_MA', 'mean_ma', 'DX_MA', 'DX_ma',
                                  'symmetry_MA', 'symmetry_ma', 'general_sample_size'])
@@ -66,7 +66,7 @@ def stat_culc():
                        data['MA'].skew(), \
                        data['ma'].skew(), \
                        len(data.index)
-    result.to_csv(RDATA_FOLDER + '\\stat_culc.csv', sep=';', index=False)
+    result.to_csv(RDATA_FOLDER + '/stat_culc.csv', sep=';', index=False)
 
 
 def segment_index(dir, index: int):
@@ -90,7 +90,7 @@ def read_image(path, file):
 
 
 def segment_file(img_file: str):
-    img_path = SIMAGE_UPLOAD_FOLDER + "\\" + img_file
+    img_path = SIMAGE_UPLOAD_FOLDER + "/" + img_file
     img = read_image(img_path, img_file)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -149,7 +149,7 @@ def segment_file(img_file: str):
         (x, y), (MA, ma), ellipse = cv2.fitEllipse(bacteria)
         data.append([MA, ma])
 
-    cv2.imwrite(RIMAGE_FOLDER + "\\" + img_file.rsplit('.', 1)[0] + ".jpeg", bacteriaImg)
+    cv2.imwrite(RIMAGE_FOLDER + "/" + img_file.rsplit('.', 1)[0] + ".jpeg", bacteriaImg)
 
     data_df = pd.DataFrame(data, columns=('MA', 'ma'))
     data_df_m = data_df
@@ -181,7 +181,7 @@ def main_page():
 def clear_folder(folder):
     files = [file for file in os.listdir(folder)]
     for file in files:
-        os.remove(folder + '\\' + file)
+        os.remove(folder + '/' + file)
 
 
 @app.route('/upload_file', methods=['GET', 'POST'])
@@ -254,10 +254,10 @@ def csv_only():
     res_files = [file for file in os.listdir(RDATA_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('data.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RDATA_FOLDER + '\\' + file)
+        zipFile.write(RDATA_FOLDER + '/' + file)
         zipFile.close()
-        if os.path.exists(RDATA_FOLDER + '\\' + file):
-            os.remove(RDATA_FOLDER + '\\' + file)
+        if os.path.exists(RDATA_FOLDER + '/' + file):
+            os.remove(RDATA_FOLDER + '/' + file)
     os.chdir(old_wd)
     return download(RDATA_FOLDER, 'data.zip')
 
@@ -269,10 +269,10 @@ def image_only():
     res_files = [file for file in os.listdir(RIMAGE_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('images.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RIMAGE_FOLDER + '\\' + file)
+        zipFile.write(RIMAGE_FOLDER + '/' + file)
         zipFile.close()
-        if os.path.exists(RIMAGE_FOLDER + '\\' + file):
-            os.remove(RIMAGE_FOLDER + '\\' + file)
+        if os.path.exists(RIMAGE_FOLDER + '/' + file):
+            os.remove(RIMAGE_FOLDER + '/' + file)
     os.chdir(old_wd)
     return download(RIMAGE_FOLDER, 'images.zip')
 
