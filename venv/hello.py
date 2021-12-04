@@ -8,15 +8,15 @@ import pandas as pd
 import czifile
 from sklearn.cluster import KMeans
 
-# SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage'
-# RIMAGE_FOLDER = 'D:\\Example\\rimage'
-# SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata'
-# RDATA_FOLDER = 'D:\\Example\\rdata'
+SIMAGE_UPLOAD_FOLDER = 'D:\\Example\\simage'
+RIMAGE_FOLDER = 'D:\\Example\\rimage'
+SDATA_UPLOAD_FOLDER = 'D:\\Example\\sdata'
+RDATA_FOLDER = 'D:\\Example\\rdata'
 
-SIMAGE_UPLOAD_FOLDER = '/home/julia/data/simage'
-RIMAGE_FOLDER = '/home/julia/data/rimage'
-SDATA_UPLOAD_FOLDER = '/home/julia/data/sdf'
-RDATA_FOLDER = '/home/julia/data/rdf'
+#SIMAGE_UPLOAD_FOLDER = '/home/julia/data/simage'
+#RIMAGE_FOLDER = '/home/julia/data/rimage'
+#SDATA_UPLOAD_FOLDER = '/home/julia/data/sdf'
+#RDATA_FOLDER = '/home/julia/data/rdf'
 
 IMAGE_ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'czi'])
 DATA_ALLOWED_EXTENSIONS = set(['csv', 'xlsx'])
@@ -90,7 +90,7 @@ def read_image(path, file):
 
 
 def segment_file(img_file: str):
-    img_path = SIMAGE_UPLOAD_FOLDER + "/" + img_file
+    img_path = os.path.join(SIMAGE_UPLOAD_FOLDER, img_file)
     img = read_image(img_path, img_file)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -181,7 +181,7 @@ def main_page():
 def clear_folder(folder):
     files = [file for file in os.listdir(folder)]
     for file in files:
-        os.remove(folder + '/' + file)
+        os.remove(os.path.join(folder, file))
 
 
 @app.route('/upload_file', methods=['GET', 'POST'])
@@ -254,10 +254,10 @@ def csv_only():
     res_files = [file for file in os.listdir(RDATA_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('data.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RDATA_FOLDER + '/' + file)
+        zipFile.write(os.path.join(RDATA_FOLDER, file))
         zipFile.close()
-        if os.path.exists(RDATA_FOLDER + '/' + file):
-            os.remove(RDATA_FOLDER + '/' + file)
+        if os.path.exists(os.path.join(RDATA_FOLDER, file)):
+            os.remove(os.path.join(RDATA_FOLDER, file))
     os.chdir(old_wd)
     return download(RDATA_FOLDER, 'data.zip')
 
@@ -269,10 +269,10 @@ def image_only():
     res_files = [file for file in os.listdir(RIMAGE_FOLDER)]
     for file in res_files:
         zipFile = zipfile.ZipFile('images.zip', 'a', zipfile.ZIP_DEFLATED)
-        zipFile.write(RIMAGE_FOLDER + '/' + file)
+        zipFile.write(os.path.join(RIMAGE_FOLDER, file))
         zipFile.close()
-        if os.path.exists(RIMAGE_FOLDER + '/' + file):
-            os.remove(RIMAGE_FOLDER + '/' + file)
+        if os.path.exists(os.path.join(RIMAGE_FOLDER, file)):
+            os.remove(os.path.join(RIMAGE_FOLDER, file))
     os.chdir(old_wd)
     return download(RIMAGE_FOLDER, 'images.zip')
 
