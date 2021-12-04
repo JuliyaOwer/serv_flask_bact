@@ -33,14 +33,13 @@
             line-height:2;
          }
          h3 {
-
             width: 90%;
             font-size: 22px;
             color: #333;
             margin: auto;
             padding: 5px;
             text-shadow: 1px 1px 1px black;
-            background: rgb(157, 213, 199, 0.5);
+            #background: rgb(157, 213, 199, 0.3);
          }
          #header {
             position: fixed;
@@ -100,6 +99,9 @@
             list-style-type: none;
             padding: 5px;
          }
+         p {
+            color: white;
+         }
     </style>
 
 </head>
@@ -117,19 +119,22 @@
 
 
     <div id="content">
-        <h2>Изображение/-я успешно добавлено!</h2>
-        <h3>Выберете один из предложенных ниже вариантов обработки:</h3>
+        <h2> Загрузка прошла успешно!</h2>
+        <h3>Выберите один из предложенных ниже вариантов обработки:</h3>
             <ul>
                  <li>
-                     <a href=full_analis class="variants"> Полная обработка и вывод всех результатов </a>
+                     <a href=full_analis class="variants"> Полная обработка</a>
                  </li>
                  <li>
-                     <a href=preprocess_image class="variants"> (НЕТ) Предварительная обработка фото </a>
+                     <a href=preprocess_image class="variants"> (нет) Предварительная обработка </a>
                  </li>
                  <li>
-                     <a href=final_results class="variants"> (НЕТ) Получение конечных расчетов </a>
+                     <a href=final_results class="variants"> (нет) Только конечные расчеты </a>
                  </li>
              </ul>
+        <p>
+            P.S. На данный момент доступна только полная обработка.
+        </p>
 
     </div>
 
